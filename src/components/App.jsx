@@ -1,7 +1,9 @@
-// import getImg from 'services/gallaryApi';
+import getImg from 'services/gallaryApi';
 import { Loader } from './Loader/Loader';
 import Searchbar from './Searchbar/Searchbar';
 import React, { Component } from 'react';
+import ImageGallery from './ImageGallery/ImageGallery';
+import ImageGalleryItem from './ImageGalleryItem/ImageGalleryItem';
 // import { toast } from 'react-toastify';
 // import 'react-toastify/dist/ReactToastify.css';
 
@@ -14,6 +16,35 @@ export default class App extends Component {
     error: null,
   };
 
+  async componentDidUpdate(prevProps, prevState) {
+    if (this.state.searchQuery === '') {
+      alert('Enter something');
+      return;
+    }
+
+    if (prevState.searchQuery !== this.state.searchQuery) {
+      try {
+        this.setState({
+          isLoading: true,
+        });
+        const data = await getImg(this.state.searchQuery);
+        this.setState(
+          prevS => ({
+            images: data.hits,
+          }),
+          () => console.log('images', this.state.images)
+        );
+        console.log(data);
+      } catch (error) {
+        console.error('Помилка під час отримання даних:', error);
+      } finally {
+        this.setState({
+          isLoading: false,
+        });
+      }
+    }
+  }
+
   // componentDidUpdate(prevProps, prevState) {
   //   console.log('componentDidUpdate');
   //   const { searchQuery, page } = this.state;
@@ -24,7 +55,8 @@ export default class App extends Component {
 
   // getImages = async (query, page) => {
   //   if (!query) {
-  //     return console.log('return');
+  //     const t = console.log('return');
+  //     return alert('Потрібно щось увести');
   //   }
   //   this.setState({
   //     searchQuery: query,
@@ -63,10 +95,13 @@ export default class App extends Component {
 
   render() {
     return (
-      <div>
-        React homework template
+      <div className="App">
+        {/* React homework template */}
         <Searchbar onSubmit={this.onFormSubmit} />
         {this.state.isLoading && <Loader />}
+        <ImageGallery>
+          <ImageGalleryItem images={this.state.images} />
+        </ImageGallery>
       </div>
     );
   }
