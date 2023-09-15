@@ -4,6 +4,7 @@ import Searchbar from './Searchbar/Searchbar';
 import React, { Component } from 'react';
 import ImageGallery from './ImageGallery/ImageGallery';
 import ImageGalleryItem from './ImageGalleryItem/ImageGalleryItem';
+import Button from './Button/Button';
 // import { toast } from 'react-toastify';
 // import 'react-toastify/dist/ReactToastify.css';
 
@@ -11,6 +12,7 @@ export default class App extends Component {
   state = {
     searchQuery: '',
     isLoading: false,
+    isLoadMore: false,
     page: 1,
     images: [],
     error: null,
@@ -89,6 +91,12 @@ export default class App extends Component {
   //   }
   // };
 
+  handleLoadMore = () => {
+    console.log(
+      'Клацнули на лоад мор, потрібно зробити перевірку стейта: серч квері і в залежності від цього міняти сторінку або скидати до одиниці'
+    );
+  };
+
   onFormSubmit = dataFromSearchbar => {
     this.setState({ searchQuery: dataFromSearchbar });
   };
@@ -102,6 +110,7 @@ export default class App extends Component {
         <ImageGallery>
           <ImageGalleryItem images={this.state.images} />
         </ImageGallery>
+        <Button handleLoadMore={this.handleLoadMore} />
       </div>
     );
   }
