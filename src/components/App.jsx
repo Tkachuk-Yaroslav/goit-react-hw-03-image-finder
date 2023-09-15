@@ -7,15 +7,20 @@ import ImageGalleryItem from './ImageGalleryItem/ImageGalleryItem';
 import Button from './Button/Button';
 // import { toast } from 'react-toastify';
 // import 'react-toastify/dist/ReactToastify.css';
-
+const LIMIT = 12;
 export default class App extends Component {
   state = {
     searchQuery: '',
     isLoading: false,
     isLoadMore: false,
-    page: 1,
-    images: [],
+    // page: null,
+    images: null,
     error: null,
+  };
+  pageDef = 1;
+  currentPage = 1;
+  incrementPage = () => {
+    return (this.pageDef = this.pageDef + 1);
   };
 
   async componentDidUpdate(prevProps, prevState) {
@@ -26,10 +31,32 @@ export default class App extends Component {
 
     if (prevState.searchQuery !== this.state.searchQuery) {
       try {
+        this.currentPage = 1;
+        this.pageDef = 1;
         this.setState({
           isLoading: true,
+          // page: 1,
         });
-        const data = await getImg(this.state.searchQuery);
+        const data = await getImg(
+          this.state.searchQuery,
+          this.currentPage,
+          LIMIT
+        );
+
+        if (!data.hits.length) {
+          this.setState({
+            images: null,
+            isLoadMore: false,
+          });
+          alert('Nothing found');
+          return;
+        }
+
+        if (data.totalHits / data.hits.length > 1) {
+          this.setState({ isLoadMore: true });
+        } else {
+          this.setState({ isLoadMore: false });
+        }
         this.setState(
           prevS => ({
             images: data.hits,
@@ -91,10 +118,45 @@ export default class App extends Component {
   //   }
   // };
 
-  handleLoadMore = () => {
-    console.log(
-      'Клацнули на лоад мор, потрібно зробити перевірку стейта: серч квері і в залежності від цього міняти сторінку або скидати до одиниці'
-    );
+  handleLoadMore = async () => {
+    try {
+      console.log(
+        'Клацнули на лоад мор, потрібно зробити перевірку стейта: серч квері і в залежності від цього міняти сторінку або скидати до одиниці'
+      );
+
+      this.currentPage += 1;
+      console.log('currentPage', this.currentPage);
+
+      this.setState(prev => ({
+        isLoading: true,
+        // page: prev.page + 1,
+      }));
+
+      const data = await getImg(
+        this.state.searchQuery,
+        this.incrementPage(),
+        LIMIT
+      );
+
+      if (data.totalHits > LIMIT * this.currentPage) {
+        this.setState({ isLoadMore: true });
+      } else {
+        this.setState({ isLoadMore: false });
+      }
+
+      this.setState(
+        prevS => ({
+          images: [...prevS.images, ...data.hits],
+        }),
+        () => console.log('imagesLoadMore', this.state.images, this.state.page)
+      );
+    } catch (error) {
+      console.error('Помилка під час отримання даних:', error);
+    } finally {
+      this.setState({
+        isLoading: false,
+      });
+    }
   };
 
   onFormSubmit = dataFromSearchbar => {
@@ -104,13 +166,21 @@ export default class App extends Component {
   render() {
     return (
       <div className="App">
-        {/* React homework template */}
         <Searchbar onSubmit={this.onFormSubmit} />
+
+        {/* {this.state.isLoading && <Loader />} */}
+
+        {this.state.images && (
+          <ImageGallery>
+            <ImageGalleryItem images={this.state.images} />
+          </ImageGallery>
+        )}
+
         {this.state.isLoading && <Loader />}
-        <ImageGallery>
-          <ImageGalleryItem images={this.state.images} />
-        </ImageGallery>
-        <Button handleLoadMore={this.handleLoadMore} />
+
+        {this.state.isLoadMore && (
+          <Button handleLoadMore={this.handleLoadMore} />
+        )}
       </div>
     );
   }
