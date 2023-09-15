@@ -7,7 +7,6 @@ const getImg = async (query, page, limit) => {
   const { data } = await axios(
     `?q=${query}&page=${page}&key=${MY_KEY}&image_type=photo&orientation=horizontal&per_page=${limit}`
   );
-  console.log('page', page);
   return data;
 };
 

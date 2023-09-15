@@ -1,13 +1,14 @@
-// import ImageGalleryItem from 'components/ImageGalleryItem/ImageGalleryItem';
-import React, { Component } from 'react';
+import ImageGalleryItem from 'components/ImageGalleryItem/ImageGalleryItem';
+import React from 'react';
 
-export default class ImageGallery extends Component {
-  render() {
-    return (
-      <ul className="ImageGallery">
-        {/*Набір <li> із зображеннями*/}
-        {this.props.children}
-      </ul>
-    );
-  }
-}
+const ImageGallery = ({ images }) => {
+  return (
+    <ul className="ImageGallery">
+      {images.map(image => (
+        <ImageGalleryItem key={image.id} image={image} />
+      ))}
+    </ul>
+  );
+};
+
+export default ImageGallery;
